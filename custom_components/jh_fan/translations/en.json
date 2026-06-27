@@ -1,0 +1,68 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add JH Fan",
+        "description": "Scan for nearby JH Fan devices or enter MAC address manually.",
+        "data": {
+          "action": "Choose method"
+        }
+      },
+      "discovery": {
+        "title": "Select Device",
+        "description": "{count} device(s) found. Select one to add.",
+        "data": {
+          "device": "Device"
+        }
+      },
+      "manual": {
+        "title": "Manual Setup",
+        "description": "Enter the MAC address of your JH Fan device.",
+        "data": {
+          "mac": "MAC Address",
+          "name": "Device Name"
+        }
+      },
+      "bluetooth_confirm": {
+        "title": "Device Found",
+        "description": "A JH Fan device was discovered:\n\n**{name}**\n`{address}`\n\nConfirm to add it."
+      },
+      "configure": {
+        "title": "Configure {name}",
+        "description": "Device: `{address}`\n\nSelect the maximum speed setting for this device.",
+        "data": {
+          "max_speed": "Max Speed"
+        }
+      }
+    },
+    "error": {
+      "invalid_mac": "Invalid MAC address format (use XX:XX:XX:XX:XX:XX)",
+      "no_devices_found": "No JH Fan devices found. Make sure the device is powered on and in range."
+    },
+    "abort": {
+      "already_configured": "This device is already configured.",
+      "no_devices_found": "No devices found."
+    }
+  },
+  "entity": {
+    "switch": {
+      "ambient_light": {
+        "name": "Ambient Light"
+      },
+      "mosquito_mode": {
+        "name": "Mosquito Mode"
+      },
+      "voice_announcements": {
+        "name": "Voice Announcements"
+      },
+      "vertical_oscillation": {
+        "name": "Vertical Oscillation"
+      }
+    },
+    "number": {
+      "turn_off_timer": {
+        "name": "Turn Off Timer"
+      }
+    }
+  }
+}

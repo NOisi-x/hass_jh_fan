@@ -1,0 +1,18 @@
+{
+  "domain": "jh_fan",
+  "name": "JH Fan",
+  "version": "1.0.0",
+  "documentation": "https://github.com/NOisi-x/hass_jh_fan",
+  "issue_tracker": "https://github.com/NOisi-x/hass_jh_fan/issues",
+  "dependencies": [],
+  "codeowners": ["@NOisi-x"],
+  "requirements": ["bleak-retry-connector>=2.0.0"],
+  "iot_class": "local_push",
+  "config_flow": true,
+  "bluetooth": [
+    {
+      "service_uuid": "0000ffb0-0000-1000-8000-00805f9b34fb",
+      "manufacturer_id": 65535
+    }
+  ]
+}

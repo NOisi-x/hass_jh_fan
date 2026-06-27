@@ -1,0 +1,68 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "添加 JH 风扇",
+        "description": "扫描附近的 JH 风扇设备或手动输入 MAC 地址。",
+        "data": {
+          "action": "选择方式"
+        }
+      },
+      "discovery": {
+        "title": "选择设备",
+        "description": "发现 {count} 个设备，请选择一个添加。",
+        "data": {
+          "device": "设备"
+        }
+      },
+      "manual": {
+        "title": "手动设置",
+        "description": "输入 JH 风扇的 MAC 地址。",
+        "data": {
+          "mac": "MAC 地址",
+          "name": "设备名称"
+        }
+      },
+      "bluetooth_confirm": {
+        "title": "发现设备",
+        "description": "发现一个 JH 风扇设备：\n\n**{name}**\n`{address}`\n\n确认添加？"
+      },
+      "configure": {
+        "title": "配置 {name}",
+        "description": "设备: `{address}`\n\n请选择此设备的风速最大档位。",
+        "data": {
+          "max_speed": "最大档位"
+        }
+      }
+    },
+    "error": {
+      "invalid_mac": "MAC 地址格式无效（请使用 XX:XX:XX:XX:XX:XX）",
+      "no_devices_found": "未找到 JH 风扇设备，请确保设备已开机且在蓝牙范围内。"
+    },
+    "abort": {
+      "already_configured": "该设备已添加。",
+      "no_devices_found": "未发现设备。"
+    }
+  },
+  "entity": {
+    "switch": {
+      "ambient_light": {
+        "name": "氛围灯"
+      },
+      "mosquito_mode": {
+        "name": "驱蚊模式"
+      },
+      "voice_announcements": {
+        "name": "语音播报"
+      },
+      "vertical_oscillation": {
+        "name": "上下摇头"
+      }
+    },
+    "number": {
+      "turn_off_timer": {
+        "name": "定时关机"
+      }
+    }
+  }
+}
