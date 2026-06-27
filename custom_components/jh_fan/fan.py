@@ -29,13 +29,20 @@ class JHFanEntity(FanEntity):
             | FanEntityFeature.SET_SPEED | FanEntityFeature.OSCILLATE
         )
         self._attr_is_on = device.is_on
-        self._attr_percentage = self._speed_to_percentage(device.speed)
+        if self._attr_is_on:
+            self._attr_percentage = self._speed_to_percentage(device.speed)
+        else:
+            self._attr_percentage = 0
         self._attr_oscillating = device.oscillation_horizontal
 
     @callback
     def _handle_coordinator_update(self) -> None:
-        self._attr_is_on = self._device.is_on
-        self._attr_percentage = self._speed_to_percentage(self._device.speed)
+        is_on = self._device.is_on
+        self._attr_is_on = is_on
+        if is_on:
+            self._attr_percentage = self._speed_to_percentage(self._device.speed)
+        else:
+            self._attr_percentage = 0
         self._attr_oscillating = self._device.oscillation_horizontal
         self.async_write_ha_state()
 

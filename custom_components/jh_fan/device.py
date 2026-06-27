@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import time
 from typing import Optional, Dict, Any
 from datetime import timedelta
 
@@ -23,8 +24,8 @@ except ImportError:
 
 PING_INTERVAL = 20
 COMMAND_DEBOUNCE = 0.2
-VERIFY_DELAY = 0.3
-VERIFY_GAP = 0.5
+VERIFY_DELAY = 1.0
+VERIFY_GAP = 1.5
 SYNC_INTERVAL = 30
 RECONNECT_BASE_DELAY = 2
 RECONNECT_MAX_DELAY = 60
@@ -154,7 +155,6 @@ class JHFanDevice:
         await self.client.start_notify(NOTIFY_CHARACTERISTIC_UUID, self._notification_handler)
 
     async def _query_device_state(self) -> None:
-        import time
         now = time.monotonic()
         if now - self._last_query_time < VERIFY_GAP:
             return
@@ -178,35 +178,39 @@ class JHFanDevice:
         self.client = None
 
     def _notification_handler(self, _sender: Any, data: bytearray) -> None:
-        raw = bytes(data)
         try:
-            parsed = self.protocol.parse_report(raw)
+            parsed = self.protocol.parse_report(bytes(data))
         except Exception:
             return
         if not parsed:
-            _LOGGER.debug("通知已忽略（无有效数据）")
             return
+
         state_changed = False
         for key in ("switch", "angleAutoLROnOff", "angleAutoUDOnOff",
                      "level_1", "timingPowerOff1", "light_1",
                      "mosquitoControl", "voiceaAnnounce"):
             if key in parsed and self._state.get(key) != parsed[key]:
-                _LOGGER.debug("状态变化: %s %s -> %s", key, self._state.get(key), parsed[key])
                 self._state[key] = parsed[key]
                 state_changed = True
         if state_changed:
-            self.hass.loop.call_soon_threadsafe(
-                self.coordinator.async_set_updated_data, self._state.copy()
-            )
+            asyncio.run_coroutine_threadsafe(self._push_state(), self.hass.loop)
+
+    async def _push_state(self):
+        coro = self.coordinator.async_set_updated_data(self._state.copy())
+        if asyncio.iscoroutine(coro):
+            await coro
 
     async def send_command(self, command: bytes) -> bool:
         if not self.connected or not self.client:
+            _LOGGER.debug("Device not connected, cannot send command")
             return False
         try:
             async with self._update_lock:
+                _LOGGER.debug("Send: %s", command.hex(" ").upper())
                 await self.client.write_gatt_char(WRITE_CHARACTERISTIC_UUID, command, response=False)
             return True
-        except Exception:
+        except Exception as e:
+            _LOGGER.warning("Send failed: %s", e)
             self.connected = False
             self.client = None
             self._schedule_reconnect()
@@ -215,11 +219,13 @@ class JHFanDevice:
     async def _send_dp_command(self, dp_key: str, value: int) -> bool:
         cmd = self.protocol.build_command(dp_key, value)
         if cmd is None:
+            _LOGGER.error("Unknown DP key: %s", dp_key)
             return False
         return await self.send_command(cmd)
 
     async def _apply_change(self, **changes: int) -> bool:
         if not self._can_control:
+            _LOGGER.debug("Debounce active, skipping command")
             return False
         self._state.update(changes)
         success = True
@@ -228,7 +234,9 @@ class JHFanDevice:
                 success = False
         if success:
             self._can_control = False
-            self.coordinator.async_set_updated_data(self._state.copy())
+            coro = self.coordinator.async_set_updated_data(self._state.copy())
+            if asyncio.iscoroutine(coro):
+                self._debounce_timer = self.hass.async_create_task(coro)
             self._debounce_timer = self.hass.async_create_task(self._verify_and_restore())
         return success
 
